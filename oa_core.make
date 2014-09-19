@@ -71,6 +71,7 @@ projects[field_group][subdir] = contrib
 ; Features Override
 projects[features_override][version] = 2.0-rc2
 projects[features_override][subdir] = contrib
+projects[features_override][patch][1950614] = "https://www.drupal.org/files/issues/reset_effect_keys-1950614-5.patch"
 
 ; Diff
 projects[diff][version] = 3.2
