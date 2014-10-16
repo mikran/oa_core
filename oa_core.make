@@ -121,6 +121,7 @@ projects[diff][subdir] = contrib
 ; Features Override
 projects[features_override][version] = 2.0-rc2
 projects[features_override][subdir] = contrib
+projects[features_override][patch][1950614] = "https://www.drupal.org/files/issues/reset_effect_keys-1950614-5.patch"
 
 ; Feeds - latest dev needed by date_ical v3.1
 projects[feeds][version] = 2.x-dev
