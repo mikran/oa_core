@@ -43,6 +43,35 @@ function oa_layouts_default_panels_mini() {
   $display->content = array();
   $display->panels = array();
     $pane = new stdClass();
+    $pane->pid = 'new-f2ec5f94-339a-49f9-b2da-a7ef498420dc';
+    $pane->panel = 'middle';
+    $pane->type = 'oa_related_ref';
+    $pane->subtype = 'oa_related_ref';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'return' => 'Finish',
+      'cancel' => 'Cancel',
+      'context' => 'requiredcontext_entity:node_1',
+      'override_title' => 0,
+      'override_title_text' => '',
+      'form_build_id' => 'form-uc-eBXCbIBlj8aVe3u_YgXJRlYvn3wwXcD943s6g5hw',
+      'form_token' => '6gDe-0oKLid466aveG1Pz21kCxrr0ZEkp8corDP0Mzs',
+      'form_id' => 'oa_related_ref_edit_form',
+      'op' => 'Finish',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 0;
+    $pane->locks = array();
+    $pane->uuid = 'f2ec5f94-339a-49f9-b2da-a7ef498420dc';
+    $display->content['new-f2ec5f94-339a-49f9-b2da-a7ef498420dc'] = $pane;
+    $display->panels['middle'][0] = 'new-f2ec5f94-339a-49f9-b2da-a7ef498420dc';
+    $pane = new stdClass();
     $pane->pid = 'new-e88f722e-09b5-451c-b694-f6b79c2d8554';
     $pane->panel = 'middle';
     $pane->type = 'oa_notifications_pane';
@@ -66,11 +95,11 @@ function oa_layouts_default_panels_mini() {
     );
     $pane->css = array();
     $pane->extras = array();
-    $pane->position = 0;
+    $pane->position = 1;
     $pane->locks = array();
     $pane->uuid = 'e88f722e-09b5-451c-b694-f6b79c2d8554';
     $display->content['new-e88f722e-09b5-451c-b694-f6b79c2d8554'] = $pane;
-    $display->panels['middle'][0] = 'new-e88f722e-09b5-451c-b694-f6b79c2d8554';
+    $display->panels['middle'][1] = 'new-e88f722e-09b5-451c-b694-f6b79c2d8554';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = '0';
   $mini->display = $display;
@@ -87,7 +116,7 @@ function oa_layouts_default_panels_mini() {
   $mini->contexts = array();
   $mini->relationships = array();
   $display = new panels_display();
-  $display->layout = 'geary';
+  $display->layout = 'radix_sutro_double';
   $display->layout_settings = array();
   $display->panel_settings = array(
     'style_settings' => array(
@@ -96,6 +125,10 @@ function oa_layouts_default_panels_mini() {
       'column1' => NULL,
       'column2' => NULL,
       'column3' => NULL,
+      'middle' => NULL,
+      'secondcolumn1' => NULL,
+      'secondcolumn2' => NULL,
+      'footer' => NULL,
     ),
   );
   $display->cache = array();
@@ -105,7 +138,7 @@ function oa_layouts_default_panels_mini() {
   $display->panels = array();
     $pane = new stdClass();
     $pane->pid = 'new-39727060-3c1c-4478-ac3f-fa1a0800ad6f';
-    $pane->panel = 'column1';
+    $pane->panel = 'footer';
     $pane->type = 'menu_tree';
     $pane->subtype = 'menu-footer';
     $pane->shown = TRUE;
@@ -128,16 +161,19 @@ function oa_layouts_default_panels_mini() {
       'style' => 'default',
       'settings' => NULL,
     );
-    $pane->css = array();
+    $pane->css = array(
+      'css_id' => '',
+      'css_class' => 'pull-left',
+    );
     $pane->extras = array();
     $pane->position = 0;
     $pane->locks = array();
     $pane->uuid = '39727060-3c1c-4478-ac3f-fa1a0800ad6f';
     $display->content['new-39727060-3c1c-4478-ac3f-fa1a0800ad6f'] = $pane;
-    $display->panels['column1'][0] = 'new-39727060-3c1c-4478-ac3f-fa1a0800ad6f';
+    $display->panels['footer'][0] = 'new-39727060-3c1c-4478-ac3f-fa1a0800ad6f';
     $pane = new stdClass();
     $pane->pid = 'new-acef9208-6753-4fee-8b2b-834b2ed0909a';
-    $pane->panel = 'column3';
+    $pane->panel = 'footer';
     $pane->type = 'oa_widgets_powered_by';
     $pane->subtype = 'oa_widgets_powered_by';
     $pane->shown = TRUE;
@@ -155,11 +191,11 @@ function oa_layouts_default_panels_mini() {
       'css_class' => 'pull-right',
     );
     $pane->extras = array();
-    $pane->position = 0;
+    $pane->position = 1;
     $pane->locks = array();
     $pane->uuid = 'acef9208-6753-4fee-8b2b-834b2ed0909a';
     $display->content['new-acef9208-6753-4fee-8b2b-834b2ed0909a'] = $pane;
-    $display->panels['column3'][0] = 'new-acef9208-6753-4fee-8b2b-834b2ed0909a';
+    $display->panels['footer'][1] = 'new-acef9208-6753-4fee-8b2b-834b2ed0909a';
   $display->hide_title = PANELS_TITLE_NONE;
   $display->title_pane = '0';
   $mini->display = $display;
@@ -176,7 +212,7 @@ function oa_layouts_default_panels_mini() {
   $mini->contexts = array();
   $mini->relationships = array();
   $display = new panels_display();
-  $display->layout = 'moscone_flipped';
+  $display->layout = 'radix_moscone_flipped';
   $display->layout_settings = array();
   $display->panel_settings = array(
     'style_settings' => array(
@@ -214,7 +250,7 @@ function oa_layouts_default_panels_mini() {
     );
     $pane->css = array(
       'css_id' => '',
-      'css_class' => 'pull-left',
+      'css_class' => 'admin-mobile-menu pull-left',
     );
     $pane->extras = array();
     $pane->position = 0;
@@ -239,7 +275,7 @@ function oa_layouts_default_panels_mini() {
     );
     $pane->css = array(
       'css_id' => '',
-      'css_class' => 'pull-left',
+      'css_class' => 'spaces-mobile-menu pull-left',
     );
     $pane->extras = array();
     $pane->position = 1;
@@ -264,7 +300,7 @@ function oa_layouts_default_panels_mini() {
     );
     $pane->css = array(
       'css_id' => '',
-      'css_class' => 'pull-right',
+      'css_class' => 'user-mobile-menu pull-right',
     );
     $pane->extras = array();
     $pane->position = 2;
@@ -289,7 +325,7 @@ function oa_layouts_default_panels_mini() {
     );
     $pane->css = array(
       'css_id' => '',
-      'css_class' => 'pull-right',
+      'css_class' => 'search-mobile-menu pull-right',
     );
     $pane->extras = array();
     $pane->position = 3;
@@ -314,7 +350,7 @@ function oa_layouts_default_panels_mini() {
     );
     $pane->css = array(
       'css_id' => '',
-      'css_class' => 'pull-right',
+      'css_class' => 'search-mobile-menu pull-right',
     );
     $pane->extras = array();
     $pane->position = 4;
@@ -339,7 +375,7 @@ function oa_layouts_default_panels_mini() {
     );
     $pane->css = array(
       'css_id' => '',
-      'css_class' => 'pull-right',
+      'css_class' => 'search-mobile-menu pull-right',
     );
     $pane->extras = array();
     $pane->position = 5;
@@ -364,7 +400,7 @@ function oa_layouts_default_panels_mini() {
     );
     $pane->css = array(
       'css_id' => '',
-      'css_class' => 'pull-right',
+      'css_class' => 'spaces-mobile-menu pull-right',
     );
     $pane->extras = array();
     $pane->position = 6;

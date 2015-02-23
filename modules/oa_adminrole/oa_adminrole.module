@@ -11,20 +11,6 @@
  */
 
 /**
- * Implements hook_menu().
- */
-function oa_adminrole_menu() {
-  $items = array();
-  $items['oa_adminrole/run'] = array(
-    'title' => 'Add admin roles to permissions',
-    'page callback' => 'oa_adminrole_update_roles',
-    'access arguments' => array('administer permissions'),
-    'type' => MENU_CALLBACK,
-  );
-  return $items;
-}
-
-/**
  * Update permissions for all content types
  */
 function oa_adminrole_update_roles() {
@@ -34,7 +20,6 @@ function oa_adminrole_update_roles() {
       oa_adminrole_update_og_permissions($type);
     }
   }
-  return '';
 }
 
 /**
@@ -134,6 +119,21 @@ function oa_adminrole_update_og_permissions($type = '') {
       // don't give messages during install
       if (!defined('MAINTENANCE_MODE')) {
         drupal_set_message(t('The <em>@role</em> role has been added to @type group/space permissions.', array('@role' => OG_ADMINISTRATOR_ROLE, '@type' => $type)));
+      }
+    }
+  }
+}
+
+
+/**
+ * Implements hook_modules_installed().
+ */
+function oa_adminrole_modules_installed($modules) {
+  foreach ($modules as $module) {
+    if ($info_array = module_invoke($module, 'node_info')) {
+      foreach ($info_array as $type => $info) {
+        oa_adminrole_update_permissions($type);
+        oa_adminrole_update_og_permissions($type);
       }
     }
   }

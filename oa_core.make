@@ -6,11 +6,6 @@ core = 7.x
 ; ************************************************
 ; ************** PANOPOLY OVERRIDES **************
 
-; Features
-; Override panopoly_core.make: 2.0
-projects[features][version] = 2.2
-projects[features][subdir] = contrib
-
 ; Views
 ; Override panopoly_core.make: 3.8
 projects[views][version] = 3.8
@@ -28,6 +23,11 @@ projects[ctools][subdir] = contrib
 ; patches from Panopoly
 projects[ctools][patch][2280875] = http://drupal.org/files/issues/ctools-icon-text-renderer-2280875-5.patch
 projects[ctools][patch][581670] = http://drupal.org/files/fix-autocomplete-581670.patch
+projects[ctools][patch][2312505] = http://drupal.org/files/issues/ctools-views-pane-more-link-2312505-1.patch
+projects[ctools][patch][1978378] = http://www.drupal.org/files/ctools-page-title-check-plained-twice-1978378-1.patch
+projects[ctools][patch][1565782] = http://www.drupal.org/files/1565782-obey-view-display-defaults-5.patch
+projects[ctools][patch][2012188] = http://www.drupal.org/files/issues/2012188-9-ctools_entity_field_content_type_admin_title.patch
+projects[ctools][patch][2055785] = http://drupal.org/files/issues/Modal-window-top-and-left-style-values-2055785-3.patch
 ; additional patches for OA
 projects[ctools][patch][1910608] = http://drupal.org/files/issues/1910608-views_content-ajax-13.patch
 projects[ctools][patch][1901106] = http://drupal.org/files/issues/ctools-views_content-exposed_form_override-1901106-24.patch
@@ -40,6 +40,18 @@ projects[entity][version] = 1.5
 projects[entity][subdir] = contrib
 ; additional patches for OA
 projects[entity][patch][1782134] = http://drupal.org/files/entity-translatable_fields_not_overriding_und_with_empty_values-1782134-5.patch
+; related to Entity Reference revisions patch (1837650)
+projects[entity][patch][1788568] = https://www.drupal.org/files/issues/entity-1788568-21-entity_metadata_wrapper_revisions.patch
+
+; Entity Reference
+; Override panopoly_core.make: 1.1
+projects[entityreference][version] = 1.x-dev
+projects[entityreference][subdir] = contrib
+projects[entityreference][download][type] = git
+projects[entityreference][download][branch] = 7.x-1.x
+projects[entityreference][download][revision] = c4bb9b
+; Add revision support.  Related patches in Entity (1788568) and OG (2363599)
+projects[entityreference][patch][1837650] = http://drupal.org/files/issues/entityreference-n1837650-47.patch
 
 ; Panelizer
 ; Override panopoly_core.make: 3.1 -> 3.x-dev
@@ -48,6 +60,8 @@ projects[panelizer][subdir] = contrib
 projects[panelizer][download][type] = git
 projects[panelizer][download][branch] = 7.x-3.x
 projects[panelizer][download][revision] = 66d184
+; patches from Panopoly
+projects[panelizer][patch][1623536] = http://drupal.org/files/issues/array-to-object-on-update-1623536-26.patch
 ; additional patches for OA
 projects[panelizer][patch][1982654] = http://drupal.org/files/1982654-panelizer-dontaskmethatagain-2.patch
 
@@ -64,6 +78,23 @@ projects[field_group][version] = 1.4
 projects[field_group][subdir] = contrib
 ;following patch not ready yet
 ;projects[field_group][patch][1278618] = http://drupal.org/files/issues/field_group-panels-integration-1278618-58.patch
+
+; Features
+; Override panopoly_core.make: 2.3
+projects[features][version] = 2.3
+projects[features][subdir] = contrib
+; additional patches for OA
+projects[features][patch][2378343] = http://drupal.org/files/issues/features_improve_features-2378343-1.patch
+
+; File Entity
+; Override panopoly_widgets.make: 20f3070
+projects[file_entity][version] = 2.x-dev
+projects[file_entity][subdir] = contrib
+projects[file_entity][download][type] = git
+projects[file_entity][download][revision] = 20f3070
+projects[file_entity][download][branch] = 7.x-2.x
+; additional patches for OA
+projects[file_entity][patch][2360043] = https://www.drupal.org/files/issues/file_entity-destination-token-decode-2360043-1.patch
 
 ; ************ End Panopoly Overrides ************
 ; ************************************************
@@ -85,11 +116,11 @@ libraries[chosen][directory_name] = "chosen"
 libraries[chosen][destination] = "libraries"
 
 ; Colorizer
-projects[colorizer][version] = 1.3
+projects[colorizer][version] = 1.4
 projects[colorizer][subdir] = contrib
 
 ; Command buttons
-projects[command_buttons][version] = 1.2
+projects[command_buttons][version] = 1.6
 projects[command_buttons][subdir] = contrib
 
 ; Conditional Fields
@@ -99,9 +130,10 @@ projects[conditional_fields][download][type] = git
 projects[conditional_fields][download][branch] = 7.x-3.x
 projects[conditional_fields][download][revision] = cd29b00
 projects[conditional_fields][patch][1982276] = http://drupal.org/files/conditional_fields-typo-in-if-condition-1982276-1.patch
-projects[conditional_fields][patch][2027307] = http://drupal.org/files/conditional_fields-export-0.patch
+projects[conditional_fields][patch][2027307] = https://www.drupal.org/files/issues/2027307-conditional_fields-export-clean-3.patch
 projects[conditional_fields][patch][1916988] = http://drupal.org/files/1916988-conditional-fields-alter-3.patch
 projects[conditional_fields][patch][1542706] = http://drupal.org/files/issues/conditional-fields-1542706-values-not-saving-72.patch
+projects[conditional_fields][patch][2362507] = https://www.drupal.org/files/issues/2362507-conditional_fields-export-1.patch
 
 ; Conditional Style Sheets
 projects[conditional_styles][version] = 2.2
@@ -122,6 +154,10 @@ projects[diff][subdir] = contrib
 projects[features_override][version] = 2.0-rc2
 projects[features_override][subdir] = contrib
 projects[features_override][patch][1950614] = "https://www.drupal.org/files/issues/reset_effect_keys-1950614-5.patch"
+
+; Features Template
+projects[features_template][version] = 1.0-beta1
+projects[features_template][subdir] = contrib
 
 ; Feeds - latest dev needed by date_ical v3.1
 projects[feeds][version] = 2.x-dev
@@ -149,6 +185,7 @@ projects[flag][patch][2027091] = http://drupal.org/files/flag-default-flags-alte
 ; HTML Mail
 projects[htmlmail][version] = 2.65
 projects[htmlmail][subdir] = contrib
+projects[htmlmail][patch][1692966] = https://www.drupal.org/files/1692966-htmlmail-mailsystem-html-to-text.patch
 
 ; Job Scheduler
 projects[job_scheduler][version] = 2.0-alpha3
@@ -157,6 +194,7 @@ projects[job_scheduler][subdir] = contrib
 ; Jquery Update
 projects[jquery_update][version] = 2.4
 projects[jquery_update][subdir] = contrib
+projects[jquery_update][patch][2123973] = http://drupal.org/files/issues/jquery_update-jquery_effects_missing-7.x-2.4-2123973-17.patch
 
 ; Mail System
 projects[mailsystem][version] = 2.34
@@ -198,17 +236,19 @@ projects[oa_responsive_regions][subdir] = contrib
 ; Organic Groups
 projects[og][version] = 2.7
 projects[og][subdir] = contrib
+; Related to Entity Reference revisions patch (1837650)
+projects[og][patch][2363599] = http://drupal.org/files/issues/og-2363599-1-infinite-loop-entityreference-revisions-load.patch
 
 ; Og menu single
-projects[og_menu_single][version] = 1.0-beta1
+projects[og_menu_single][version] = 1.0-beta2
 projects[og_menu_single][subdir] = contrib
 
 ; OG Session Context
-projects[og_session_context][version] = 1.0-beta1
+projects[og_session_context][version] = 1.0-beta2
 projects[og_session_context][subdir] = contrib
 
 ; Og Variables
-projects[og_variables][version] = 1.0-beta1
+projects[og_variables][version] = 1.0-beta2
 projects[og_variables][subdir] = contrib
 
 ; Organic Groups Vocabulary
@@ -216,10 +256,15 @@ projects[og_vocab][version] = 1.2
 projects[og_vocab][subdir] = contrib
 ; patch to support subgroups
 projects[og_vocab][patch][2039009] = http://drupal.org/files/issues/2039009-allow-shared-vocabularies-13.patch
+projects[og_vocab][patch][2399883] = https://www.drupal.org/files/issues/2399883-og_vocab-menuitem-2.patch
 
 ; Panels Custom Error
 projects[panels_customerror][version] = 1.0
 projects[panels_customerror][subdir] = contrib
+
+; Paragraphs
+projects[paragraphs][version] = 1.0-beta5
+projects[paragraphs][subdir] = contrib
 
 ; Real Name
 projects[realname][version] = 1.2

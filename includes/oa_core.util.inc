@@ -96,11 +96,15 @@ function oa_core_get_groups_by_user($account = NULL, $group_type = NULL, $includ
  *   (optional) Adds a pager to the query for the given page number
  * @param string $filter
  *   (optional) Filters the space titles that are returned
+ * @param string $type
+ *   (optional) Type of group.  Defaults to OA_SPACE_TYPE
+ * @param string $sort
+ *   (optional) Field to sort on.  Use 'history' to sort by most recently accessed.  Start with - to reverse sort direction
  *
  * @return array
  *   An array with the group IDs or an empty array, or returns NULL if there was an error
  */
-function oa_core_get_groups_by_user_access($account = NULL, $include_archived = FALSE, $status = NULL, $page = NULL, $filter = NULL) {
+function oa_core_get_groups_by_user_access($account = NULL, $include_archived = FALSE, $status = NULL, $page = NULL, $filter = NULL, $type = NULL, $sort = NULL, $limit = NULL) {
   if (!isset($account)) {
     global $user;
     $uid = $user->uid;
@@ -116,8 +120,8 @@ function oa_core_get_groups_by_user_access($account = NULL, $include_archived = 
     $states = array(OG_STATE_ACTIVE);
   }
 
-  $cid = oa_core_get_cache_id(OA_CACHE_GROUPS_BY_USER_ACCESS, $uid, $include_archived, array($status, $page));
-  if (empty($filter) && oa_core_get_cache(OA_CACHE_GROUPS_BY_USER_ACCESS, $cid, $result)) {
+  $cid = oa_core_get_cache_id(OA_CACHE_GROUPS_BY_USER_ACCESS, $uid, $include_archived, array($status, $page, $type, $sort, $limit));
+  if (empty($filter) && ($sort != 'history') && oa_core_get_cache(OA_CACHE_GROUPS_BY_USER_ACCESS, $cid, $result)) {
     return $result;
   }
 
@@ -129,14 +133,37 @@ function oa_core_get_groups_by_user_access($account = NULL, $include_archived = 
     $query = $query->extend('PagerDefault')->limit(20);
   }
 
+  $sort = isset($sort) ? $sort : 'title';
+  $limit = isset($limit) ? $limit : 0;
+  $type = isset($type) ? $type : OA_SPACE_TYPE;
+
   $query->join('og_membership', 'ogm', 'ogm.gid = n.nid');
+  if ($sort == 'history') {
+    $query->join('history', 'h', 'h.nid = n.nid');
+    $query->condition('h.uid', $uid);
+    $query->orderBy('h.timestamp', 'DESC');
+  }
   $query
     ->fields('n', array('nid', 'title'))
     ->condition('ogm.etid', $uid)
     ->condition('ogm.entity_type', 'user')
     ->condition('ogm.state', OG_STATE_ACTIVE)
-    ->orderBy('n.title')
     ->addTag('node_access');
+
+  if (!empty($sort) && ($sort != 'history')) {
+    $dir = 'ASC';
+    if (substr($sort,0,1) == '-') {
+      $dir = 'DESC';
+      $sort = substr($sort, 1, strlen($sort)-1);
+    }
+    $query->orderBy('n.' . $sort, $dir);
+    // secondary sort on title
+    $query->orderBy('n.title');
+  }
+
+  if (isset($type)) {
+    $query->condition('n.type', $type);
+  }
 
   if (isset($status)) {
     $query->condition('n.status', $status);
@@ -144,6 +171,10 @@ function oa_core_get_groups_by_user_access($account = NULL, $include_archived = 
 
   if (!empty($filter)) {
     $query->condition('n.title', '%' . db_like($filter) . '%', 'LIKE');
+  }
+
+  if ($limit > 0) {
+    $query->range(0, $limit);
   }
 
   if (module_exists('flag') && !$include_archived) {
@@ -431,6 +462,28 @@ function oa_core_get_top_parents($bundle, $status = NULL, $include_archived = FA
 }
 
 /**
+ * Get all the content within a particular Section.
+ *
+ * @param int $nid
+ *   The node ID of the Section.
+ *
+ * @return array
+ *   An array of node IDs.
+ */
+function oa_core_get_section_content($nid) {
+  $query = new EntityFieldQuery();
+  $query
+    ->entityCondition('entity_type', 'node')
+    ->propertyCondition('status', 1)
+    ->fieldCondition('oa_section_ref', 'target_id', $nid);
+  $result = $query->execute();
+  if (isset($result['node'])) {
+    return array_keys($result['node']);
+  }
+  return array();
+}
+
+/**
  * Determine if a user is a member of a team
  * @param  int $team_id
  * @param  int $user_id
@@ -483,7 +536,7 @@ function oa_core_section_is_public($node) {
  *
  * @return array of strings denoting content types marked for omission
  */
-function oa_core_list_content_types($space_content = FALSE) {
+function oa_core_list_content_types($space_content = FALSE, $include_core = TRUE) {
   $nodes = node_type_get_types();
   if ($space_content) {
     // remove types that are not space content
@@ -497,6 +550,9 @@ function oa_core_list_content_types($space_content = FALSE) {
   // Queries hook_oa_omit_content_types to determine what content types
   //   modules wants to hide.
   $deny = module_invoke_all('oa_omit_content_types');
+  if (!$include_core) {
+    $deny = array_merge($deny, array(OA_SPACE_TYPE, OA_GROUP_TYPE, OA_SECTION_TYPE, OA_TEAM_TYPE));
+  }
   if (!empty($deny)) {
     foreach ($deny as $remove) {
       unset($nodes[$remove]);
@@ -603,18 +659,34 @@ function oa_core_get_titles($ids = array(), $type = '', $sort_field = 'title', $
       $query->condition('n.type', $type);
     }
     $result = $query->execute();
+
+    // if $sort_field is empty, maintain the order of the original $ids
+    // so create a lookup table.
+    $nid_row = array();
+    $index = 0;
     while ($row = $result->fetchAssoc()) {
-      foreach ($fields as $field) {
-        $field_name = ($field == 'id') ? 'nid' : $field;
-        $value = isset($row[$field_name]) ? $row[$field_name] : NULL;
-        if (($field == 'title') && $sanitize) {
-          $value = check_plain($value);
+      $id = empty($sort_field) ? $row['nid'] : $index;
+      $nid_row[$id] = $row;
+      $index++;
+    }
+
+    $index = 0;
+    foreach ($ids as $nid) {
+      $id = empty($sort_field) ? $nid : $index;
+      if (!empty($nid_row[$id])) {
+        foreach ($fields as $field) {
+          $field_name = ($field == 'id') ? 'nid' : $field;
+          $value = isset($nid_row[$id][$field_name]) ? $nid_row[$id][$field_name] : NULL;
+          if (($field == 'title') && $sanitize) {
+            $value = check_plain($value);
+          }
+          if ($field == 'link') {
+            $value = l($nid_row[$id]['title'], 'node/' . $nid_row[$id]['nid']);
+          }
+          $return[$field . 's'][$nid_row[$id]['nid']] = $value;
         }
-        if ($field == 'link') {
-          $value = l($row['title'], 'node/' . $row['nid']);
-        }
-        $return[$field . 's'][] = $value;
       }
+      $index++;
     }
   }
   return $return;
@@ -651,11 +723,13 @@ function oa_core_truncate_list($list, $count, $more_link = '', $always_link = FA
  * @param bool $include_archived
  *   (optional) Whether to include archived nodes or not. By default, archived
  *   items aren't included.
+ * @param bool $check_access
+ *   Check node access, defaults to TRUE.
  *
  * @return array
  *   An array of Space NIDs.
  */
-function oa_core_get_public_spaces($group_types = array(OA_SPACE_TYPE => OA_SPACE_TYPE), $status = NULL, $include_archived = FALSE) {
+function oa_core_get_public_spaces($group_types = array(OA_SPACE_TYPE => OA_SPACE_TYPE), $status = NULL, $include_archived = FALSE, $check_access = TRUE) {
   $cache = &drupal_static(__FUNCTION__);
 
   $group_types_cid = implode(',', $group_types);
@@ -668,6 +742,9 @@ function oa_core_get_public_spaces($group_types = array(OA_SPACE_TYPE => OA_SPAC
       ->condition('g.group_access_value', 0);
     if (isset($status)) {
       $query->condition('n.status', $status);
+    }
+    if ($check_access) {
+      $query->addTag('node_access');
     }
     if (module_exists('flag') && !$include_archived) {
       if ($flag = flag_get_flag('trash')) {
@@ -1016,4 +1093,114 @@ function oa_core_get_bootstrap_version() {
     $radix_version = intval(substr($info['version'], 4, 1));
   }
   return $radix_version;
+}
+
+/**
+ * Helper function to create a new Section or Space Type taxonomy term
+ * @param string $vocab
+ *   Machine name of vocabulary to add term to
+ * @param string $name
+ *   Human readable label of the term
+ * @param array $params
+ *   expected to have fields for:
+ *   'taxonomy' - vocabulary machine name.
+ *   'name' - The human readable label of the term.
+ *   'description' - The human readable description of the term.
+ *   'node_options' - An array of node types which should be allowed within the section.
+ *   'layout' - The panelizer layout key to use for this section.
+ *   'icon' - The icon class to use in the sitemap.
+ * @param bool $update
+ *   Whether an existing term is allowed to be updated.
+ */
+function oa_core_create_term($vocab_name, $name, $params, $update = TRUE) {
+  $vocab = oa_core_taxonomy_vocabulary($vocab_name);
+  $term = NULL;
+
+  // This function can get called from install hooks.
+  // Make sure the Taxonomy is available.
+  if (!$vocab) {
+    features_revert(array(
+      'oa_core' => array('taxonomy'),
+      'oa_sections' => array('taxonomy'),
+    ));
+    drupal_static('taxonomy_vocabulary_get_names');
+    $vocab = oa_core_taxonomy_vocabulary($vocab_name);
+  }
+
+  if (!empty($vocab)) {
+    $conditions = array(
+      'name' => trim($name),
+      'vid' => $vocab->vid,
+    );
+    $term = current( entity_load('taxonomy_term', array(), $conditions));
+
+    if (!$term || $update) {
+
+      // Make sure the fields are available.
+      $field_info = field_info_instances('taxonomy_term', $vocab_name);
+      $revert = array();
+      if (empty($field_info['field_oa_node_types'])) {
+        $revert['oa_buttons'] = array('field_base', 'field_instance');
+      }
+      if (empty($field_info['field_oa_section_layout'])) {
+        $revert['oa_core'] = array('field_base', 'field_instance');
+      }
+      if (empty($field_info['field_oa_icon_class'])) {
+        $revert['oa_sections'] = array('field_base', 'field_instance');
+      }
+      if (!empty($revert)) {
+        features_revert($revert);
+        field_info_cache_clear();
+      }
+
+      $description = $params['description'];
+      $node_options = $params['node_options'];
+      $layout = $params['layout'];
+      $icon = !empty($params['icon']) ? $params['icon'] : '';
+
+      if ($term && $update) {
+        // Update existing term.
+        if (isset($term->field_oa_icon_class)) {
+          $term->field_oa_icon_class[LANGUAGE_NONE][0]['value'] = $icon;
+        }
+        $term->field_oa_section_layout[LANGUAGE_NONE][0]['value'] = $layout;
+        $term->field_oa_node_types[LANGUAGE_NONE] = array();
+      }
+      else {
+        // Create new term.
+        $term = (object)array(
+          'vid' => $vocab->vid,
+          'name' => $name,
+          'description' => $description,
+          'format' => 'panopoly_wysiwyg_text',
+          'field_oa_icon_class' => array(
+            LANGUAGE_NONE => array(
+              array('value' => $icon),
+            ),
+          ),
+          'field_oa_section_layout' => array(
+            LANGUAGE_NONE => array(
+              array('value' => $layout),
+            ),
+          ),
+          'field_oa_node_types' => array(
+            LANGUAGE_NONE => array(),
+          ),
+          'path' => array(
+            'alias' => '',
+            'pathauto' => '',
+          ),
+          'oa_button' => TRUE,
+        );
+      }
+
+      if (!empty($node_options)) {
+        foreach ($node_options as $type) {
+          $term->field_oa_node_types[LANGUAGE_NONE][] = array('value' => $type);
+        }
+      }
+      taxonomy_term_save($term);
+    }
+  }
+  return $term;
 }

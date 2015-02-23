@@ -440,8 +440,8 @@ function oa_sections_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-section_type-field_icon_class'
-  $field_instances['taxonomy_term-section_type-field_icon_class'] = array(
+  // Exported field_instance: 'taxonomy_term-section_type-field_oa_icon_class'
+  $field_instances['taxonomy_term-section_type-field_oa_icon_class'] = array(
     'bundle' => 'section_type',
     'default_value' => NULL,
     'deleted' => 0,
@@ -462,7 +462,7 @@ function oa_sections_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'taxonomy_term',
-    'field_name' => 'field_icon_class',
+    'field_name' => 'field_oa_icon_class',
     'label' => 'Icon class',
     'required' => 0,
     'settings' => array(
@@ -484,8 +484,8 @@ function oa_sections_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-section_type-field_icon_image'
-  $field_instances['taxonomy_term-section_type-field_icon_image'] = array(
+  // Exported field_instance: 'taxonomy_term-section_type-field_oa_icon_image'
+  $field_instances['taxonomy_term-section_type-field_oa_icon_image'] = array(
     'bundle' => 'section_type',
     'deleted' => 0,
     'description' => 'Image file to use in place of icon',
@@ -508,7 +508,7 @@ function oa_sections_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'taxonomy_term',
-    'field_name' => 'field_icon_image',
+    'field_name' => 'field_oa_icon_image',
     'label' => 'Icon image',
     'required' => 0,
     'settings' => array(
@@ -602,6 +602,49 @@ function oa_sections_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'taxonomy_term-section_type-field_oa_section_type_menu'
+  $field_instances['taxonomy_term-section_type-field_oa_section_type_menu'] = array(
+    'bundle' => 'section_type',
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 4,
+      ),
+      'featured' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_oa_section_type_menu',
+    'label' => 'Menu Behaviour',
+    'required' => 1,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'apply_chosen' => 0,
+      ),
+      'type' => 'options_select',
+      'weight' => 33,
+    ),
+  );
+
   // Translatables
   // Included for use with string extractors like potx.
   t('Body');
@@ -615,6 +658,7 @@ function oa_sections_field_default_field_instances() {
   t('Leave empty for public access, otherwise select Groups that can view this Section.');
   t('Leave empty for public access, otherwise select Space Members that can view this Section.');
   t('Leave empty for public access, otherwise select Teams that can view this Section.');
+  t('Menu Behaviour');
   t('Override default section options');
   t('Section Layout');
   t('Section Type');

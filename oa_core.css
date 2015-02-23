@@ -11,6 +11,10 @@
   max-width: 100%;
 }
 
+.help-block {
+  white-space: normal;
+}
+
 #modal-content .widget-preview-title {
   /* move Add button to left so wide tables doesnt scroll */
   left: 10px;
@@ -23,10 +27,6 @@
 }
 .views-exposed-form .views-exposed-widget.views-widget-filter-og_group_ref_target_id {
   padding-bottom: 0.5em;
-}
-
-body.panels-ipe #modalContent {
-  position: fixed !important;
 }
 
 .oa_pending_count {

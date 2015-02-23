@@ -7,6 +7,7 @@
 /**
  * Determine access to a Open Atrium Section
  * do NOT use node_load here as it gets called from hook_node_grants()
+ * TODO: No longer called from node_grants, but called from tests.  Is this still needed?
  */
 function oa_core_section_access($row, $spaces, $account) {
 
@@ -74,7 +75,7 @@ function oa_core_node_grants($account, $op) {
 
   // Combine the spaces the user is part of with public spaces.
   $member_spaces = oa_core_get_groups_by_user($account, 'node');
-  $spaces = array_merge($member_spaces, oa_core_get_public_spaces());
+  $spaces = array_merge($member_spaces, oa_core_get_public_spaces(array(OA_SPACE_TYPE => OA_SPACE_TYPE), NULL,  FALSE, FALSE));
   if (!empty($spaces)) {
     $query = db_select('node', 'n');
 
@@ -225,10 +226,8 @@ function oa_core_node_access($node, $op, $account) {
 function oa_core_node_update($node) {
   if (($node->type == OA_SPACE_TYPE) || ($node->type == OA_GROUP_TYPE)) {
     // check if group access changed and update space content grants
-    if (isset($node->group_access[LANGUAGE_NONE][0]['value']) &&
-      isset($node->original->group_access[LANGUAGE_NONE][0]['value']) &&
-      ($node->group_access[LANGUAGE_NONE][0]['value'] !=
-       $node->original->group_access[LANGUAGE_NONE][0]['value'])) {
+    $rebuild = module_invoke_all('oa_core_og_content_needs_rebuild', $node);
+    if (in_array(TRUE, $rebuild, TRUE)) {
       // rebuild space content nodes
       $nodes = db_select('og_membership', 'og')
         ->fields('og', array('etid'))
@@ -264,6 +263,16 @@ function oa_core_node_update($node) {
 }
 
 /**
+ * Implements hook_oa_core_og_content_needs_rebuild().
+ */
+function oa_core_oa_core_og_content_needs_rebuild($node) {
+  return isset($node->group_access[LANGUAGE_NONE][0]['value']) &&
+    isset($node->original->group_access[LANGUAGE_NONE][0]['value']) &&
+    ($node->group_access[LANGUAGE_NONE][0]['value'] !=
+     $node->original->group_access[LANGUAGE_NONE][0]['value']);
+}
+
+/**
  * Implements hook_file_entity_access().
  *
  * Check permissions of private files based upon the node they are attached to
@@ -286,6 +295,25 @@ function oa_core_file_entity_access($op, $file, $account) {
         ->addTag('node_access')
         ->execute()
         ->fetchCol(0);
+      // add paragraph references
+      if (module_exists('paragraphs')) {
+        $query = db_select('node', 'n');
+        if (user_access('view revisions')) {
+          $query->join('field_revision_field_oa_related', 'r', "n.nid = r.entity_id AND r.entity_type = 'node'");
+          $query->join('field_revision_field_oa_media', 'f', "r.field_oa_related_value = f.entity_id AND f.entity_type = 'paragraphs_item'");
+        }
+        else {
+          $query->join('field_data_field_oa_related', 'r', "n.nid = r.entity_id AND r.entity_type = 'node'");
+          $query->join('field_data_field_oa_media', 'f', "r.field_oa_related_value = f.entity_id AND f.entity_type = 'paragraphs_item'");
+        }
+        $related_nids = $query
+          ->fields('n', array('nid'))
+          ->condition('f.field_oa_media_fid', $file->fid)
+          ->addTag('node_access')
+          ->execute()
+          ->fetchCol(0);
+        $nids = array_merge($nids, $related_nids);
+      }
       if (!empty($nids)) {
         $nids = array_unique($nids);
         // Ensure the user *really* has access to the nodes
@@ -294,7 +322,7 @@ function oa_core_file_entity_access($op, $file, $account) {
         // shouldn't be a performance issue.
         if (user_access('view files', $account)) {
           foreach ($nids as $nid) {
-            if (($node = node_load($nid)) && node_access($op, $node, $account)) {
+            if (($node = node_load($nid)) && node_access('view', $node, $account)) {
               return FILE_ENTITY_ACCESS_ALLOW;
             }
           }
@@ -313,6 +341,18 @@ function oa_core_file_entity_access($op, $file, $account) {
           ->condition('f.field_oa_media_fid', $file->fid)
           ->execute()
           ->fetchCol(0);
+        // add paragraph references
+        if (module_exists('paragraphs')) {
+          $query = db_select('node', 'n');
+          $query->join('field_data_field_oa_related', 'r', "n.nid = r.entity_id AND r.entity_type = 'node'");
+          $query->join('field_data_field_oa_media', 'f', "r.field_oa_related_value = f.entity_id AND f.entity_type = 'paragraphs_item'");
+          $related_nids = $query
+            ->fields('n', array('nid'))
+            ->condition('f.field_oa_media_fid', $file->fid)
+            ->execute()
+            ->fetchCol(0);
+          $nids = array_merge($nids, $related_nids);
+        }
         if (empty($nids)) {
           // File is not referenced by any node revision, so allow it if they can access content
           // Open Atrium treats unattached files as public since everything is

@@ -141,7 +141,7 @@ function oa_news_views_default_views() {
     'image_style' => 'panopoly_image_square',
     'image_link' => 'content',
   );
-  /* Field: Content: Attachments */
+  /* Field: Field: Attachments */
   $handler->display->display_options['fields']['field_oa_media']['id'] = 'field_oa_media';
   $handler->display->display_options['fields']['field_oa_media']['table'] = 'field_data_field_oa_media';
   $handler->display->display_options['fields']['field_oa_media']['field'] = 'field_oa_media';
@@ -163,6 +163,13 @@ function oa_news_views_default_views() {
   );
   $handler->display->display_options['fields']['field_oa_media']['delta_limit'] = '1';
   $handler->display->display_options['fields']['field_oa_media']['delta_offset'] = '0';
+  /* Field: Content: Edit link */
+  $handler->display->display_options['fields']['edit_node']['id'] = 'edit_node';
+  $handler->display->display_options['fields']['edit_node']['table'] = 'views_entity_node';
+  $handler->display->display_options['fields']['edit_node']['field'] = 'edit_node';
+  $handler->display->display_options['fields']['edit_node']['label'] = '';
+  $handler->display->display_options['fields']['edit_node']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['edit_node']['text'] = '[edit]';
   /* Sort criterion: Content: Sticky */
   $handler->display->display_options['sorts']['sticky']['id'] = 'sticky';
   $handler->display->display_options['sorts']['sticky']['table'] = 'node';
@@ -200,7 +207,7 @@ function oa_news_views_default_views() {
   $handler->display->display_options['filters']['is_parent']['id'] = 'is_parent';
   $handler->display->display_options['filters']['is_parent']['table'] = 'field_data_oa_parent';
   $handler->display->display_options['filters']['is_parent']['field'] = 'is_parent';
-  /* Filter criterion: Content: Groups audience (og_group_ref) */
+  /* Filter criterion: Content: Groups audience (og_group_ref:target_id) */
   $handler->display->display_options['filters']['og_group_ref_target_id']['id'] = 'og_group_ref_target_id';
   $handler->display->display_options['filters']['og_group_ref_target_id']['table'] = 'og_membership';
   $handler->display->display_options['filters']['og_group_ref_target_id']['field'] = 'og_group_ref_target_id';
@@ -215,7 +222,7 @@ function oa_news_views_default_views() {
     3 => 0,
     4 => 0,
   );
-  /* Filter criterion: Content: Open Atrium Section (oa_section_ref) */
+  /* Filter criterion: Content: Open Atrium Section (oa_section_ref:target_id) */
   $handler->display->display_options['filters']['oa_section_ref_target_id']['id'] = 'oa_section_ref_target_id';
   $handler->display->display_options['filters']['oa_section_ref_target_id']['table'] = 'field_data_oa_section_ref';
   $handler->display->display_options['filters']['oa_section_ref_target_id']['field'] = 'oa_section_ref_target_id';
