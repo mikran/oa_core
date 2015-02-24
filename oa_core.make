@@ -263,7 +263,7 @@ projects[panels_customerror][version] = 1.0
 projects[panels_customerror][subdir] = contrib
 
 ; Paragraphs
-projects[paragraphs][version] = 1.0-beta5
+projects[paragraphs][version] = 1.0-beta6
 projects[paragraphs][subdir] = contrib
 
 ; Real Name
